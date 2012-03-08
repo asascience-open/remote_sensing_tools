@@ -1,76 +1,38 @@
-#!/bin/bash
-
-source /etc/profile.d/netcdf.sh
-
-d1=$(date '+%s')
-
-# Composite days are the first paramter into the script
-# Location of RAW output is second
-# Where to save fixed output is third
-# Folder to put composite in is fourth
-
-files=""
-justDates=""
-numDays=$1
-echo "Starting masking..."
-for f in `find $2 -mtime -${numDays} -type f`; do
-  # 20110801.213.1350.n16.EC1.nc
-  fileDt=$(echo $f | sed 's/\([0-9]\{8\}\)\.\([0-9]\{3\}\)\.\([0-9]\{2\}\)\([0-9]\{2\}\)\.n\([0-9]\{2\}\)\.EC1\.nc/\1\ \3\:\4:00/' | awk -F"/" '{print $NF}')
-  d2=$(date --utc -d "$fileDt" +%s)
-  diff=$((d1-d2))
-  seconds=$((numDays * 24 * 60 * 60))
-  if [ $diff -lt $seconds ]; then
-
-    outDirectory=$3/$(date --utc -d "$fileDt" +%Y)/$(date --utc -d "$fileDt" +%m)
-    if [ ! -d "$outDirectory" ]; then
-      mkdir -p $outDirectory
-    fi
-    tmp=${f##*/}
-    outFile=${tmp%.*}
-    outPath=$outDirectory/$outFile.nc
-    finalPath=$outDirectory/$outFile.masked.nc
-    
-    # Have we already created the mask for this file?
-    if [ ! -f $finalPath ]; then
-      # Do some cleanup on the MissingValue attributes files
-      ncatted -h -a _FillValue,mcsst,d,, $f $outPath
-      ncrename -h -a mcsst@missing_value,_FillValue $outPath
-      ncatted -h -a missing_value,mcsst,o,f,-999 $outPath
- 
-      # Mask the SST
-      ncwa -4 -L 9 -h -y avg -a time -b -v mcsst -m cloud_land_mask -B "cloud_land_mask = 0" $outPath $finalPath
-      rm $outPath
-    fi
-    files=${files}" "${finalPath}
-    justDates=${justDates}" "${outFile}
-  fi
-done
-echo "Complete."
-echo "Starting composite..."
-# Sort the dates
-reverseFiles=$(echo $files | sed 's/ /\n/g' | sort -r | sed 's/\n/ /g')
-files=$(echo $files | sed 's/ /\n/g' | sort | sed 's/\n/ /g')
-lastFile=$(echo ${files##*/} | sed 's/\([0-9]\{8\}\)\.\([0-9]\{3\}\)\.\([0-9]\{2\}\)\([0-9]\{2\}\)\.n\([0-9]\{2\}\)\.EC1\.masked\.nc/\1\ \3\:\4:00/' | awk -F"/" '{print $NF}')
-lastDate=$(date --utc -d "$lastFile" +%Y-%m-%dT%H:%M:%SZ)
-lastFileDate=$(date --utc -d "$lastFile" +%Y%m%d.%H%M)
-lastFileYear=$(date --utc -d "$lastFile" +%Y)
-lastFileMonth=$(date --utc -d "$lastFile" +%m)
-compositeDirectory=$4/$lastFileYear/$lastFileMonth
-
-if [ ! -z "$files" ]; then
-  if [ ! -d "$compositeDirectory" ]; then
-    mkdir -p $compositeDirectory
-  fi 
-  compFile=$compositeDirectory/${lastFileDate}.d${numDays}.composite.nc
-  if [ ! -f "$compFile" ]; then
-    echo "Making ${numDays}-day composite from ${lastDate}..."
-    ncea -4 -L 9 -h -y avg -v chl_oc3,sst,ndvi,salinity,M_WK,M_WK_G,PIM_gould,POM_gould,TSS_gould $reverseFiles $compFile # changed to reflect desired products in MODIS files for composite
-    echo "Saving to $compFile..."
-    ncatted -h -a history,global,d,, $compFile
-    ncatted -h -a composite_members,global,o,c,"$justDates" $compFile
-  else
-    echo "Composite file already exists: $compFile"
-  fi
-else
-  echo "No files to composite!"
-fi
+#!/bin/bash
+
+source /etc/profile.d/netcdf.sh
+
+d1=$(date '+%s')
+
+# Composite days are the first paramter into the script
+# Location of RAW output is second
+# Where to save fixed output is third
+# Folder to put composite in is fourth
+
+files=""
+echo "Starting composite..."
+for f in `find $1 -type f`; do
+  # aqua.2012066.0306.170828.D.L3.modis.NAT.v09.1000m.nc4
+  files=${files}" "${f}
+done
+
+tmpdir="temp/"
+mkdir $tmpdir
+
+ncea -4 -L 9 -h -y avg -v chl_oc3 $files "$tmpdir/clo.nc"
+ncea -4 -L 9 -h -y avg -v sst $files "$tmpdir/sst.nc"
+ncea -4 -L 9 -h -y avg -v ndvi $files "$tmpdir/ndvi.nc"
+ncea -4 -L 9 -h -y avg -v salinity $files "$tmpdir/salinity.nc"
+ncea -4 -L 9 -h -y avg -v M_WK $files "$tmpdir/M_WK.nc"
+ncea -4 -L 9 -h -y avg -v M_WK_G $files "$tmpdir/M_WK_G.nc"
+ncea -4 -L 9 -h -y avg -v PIM_gould $files "$tmpdir/PIM_gould.nc"
+ncea -4 -L 9 -h -y avg -v POM_gould $files "$tmpdir/POM_gould.nc"
+ncea -4 -L 9 -h -y avg -v TSS_gould $files "$tmpdir/TSS_gould.nc"
+
+# Now union all of the files in $tmpdir using ncks.
+# Don't save the output in $tmpdir, because it is removed.
+
+# Remove the files we don't need anymore.
+rm -rf $tmpdir
+
+echo "Complete."
