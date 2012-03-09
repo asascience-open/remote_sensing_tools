@@ -56,6 +56,7 @@ lastFileDate=$(date --utc -d "$lastFile" +%Y%m%d.%H%M)
 lastFileYear=$(date --utc -d "$lastFile" +%Y)
 lastFileMonth=$(date --utc -d "$lastFile" +%m)
 compositeDirectory=$4/$lastFileYear/$lastFileMonth
+productList="chl_oc3, lat, lon, time, sst, ndvi, salinity, M_WK, M_WK_G, PIM_gould, POM_gould, TSS_gould" # for changing the global attribute in the resulting ncdf
 
 if [ ! -z "$files" ]; then
   if [ ! -d "$compositeDirectory" ]; then
@@ -65,18 +66,18 @@ if [ ! -z "$files" ]; then
   if [ ! -f "$compFile" ]; then
     echo "Making ${numDays}-day composite from ${lastDate}..."
     tmpdir="temp"
-    mkdir $tmpdir
-    ncea -4 -L 9 -h -y avg -v chl_oc3 $reverseFiles $tmpdir/chl.nc4
+    mkdir $tmpdir # directory to be deleted
+    ncea -4 -L 9 -h -y avg -v chl_oc3 $reverseFiles $tmpdir/chl.nc4 # compiling each product individually and storing in temp/
     ncea -4 -L 9 -h -y avg -v sst $reverseFiles $tmpdir/sst.nc4
     ncea -4 -L 9 -h -y avg -v ndvi $reverseFiles $tmpdir/ndvi.nc4
     ncea -4 -L 9 -h -y avg -v salinity $reverseFiles $tmpdir/sal.nc4
-    ncea -4 -L 9 -h -y avg -v M_WK $reverseFiles $tmpdir/MWK.nc4 # seems to cause issues
+    ncea -4 -L 9 -h -y avg -v M_WK $reverseFiles $tmpdir/MWK.nc4
     ncea -4 -L 9 -h -y avg -v M_WK_G $reverseFiles $tmpdir/MWKG.nc4
     ncea -4 -L 9 -h -y avg -v PIM_gould $reverseFiles $tmpdir/PIM.nc4
     ncea -4 -L 9 -h -y avg -v POM_gould $reverseFiles $tmpdir/POM.nc4
     ncea -4 -L 9 -h -y avg -v TSS_gould $reverseFiles $tmpdir/TSS.nc4
     echo "Saving to $compFile..."
-    ncks $tmpdir/chl.nc4 $compFile
+    ncks $tmpdir/chl.nc4 $compFile # appending each product to $compFile
     ncks -A $tmpdir/sst.nc4 $compFile
     ncks -A $tmpdir/ndvi.nc4 $compFile
     ncks -A $tmpdir/sal.nc4 $compFile
@@ -85,9 +86,10 @@ if [ ! -z "$files" ]; then
     ncks -A $tmpdir/PIM.nc4 $compFile
     ncks -A $tmpdir/POM.nc4 $compFile
     ncks -A $tmpdir/TSS.nc4 $compFile
-    rm -rf $tmpdir
+    rm -rf $tmpdir # removing temp files and directory
     ncatted -h -a history,global,d,, $compFile
     ncatted -h -a composite_members,global,o,c,"$justDates" $compFile
+    ncatted -h -a product_list,global,o,c,"$productList" $compFile # change global attribute "priduct_list" to $productList
   else
     echo "Composite file already exists: $compFile"
   fi
