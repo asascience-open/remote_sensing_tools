@@ -65,7 +65,7 @@ ncatted -h \
   -a grid_mapping_name,crs,o,c,"mercator" \
   -a longitude_of_projection_origin,crs,o,c,"TODO" \
   -a standard_parallel,crs,o,c,"TODO" \
-  -a semi_major_axis,crs,o,c,6378137.0 \
+  -a semi_major_axis,crs,o,d,6378137.0 \
   -a inverse_flattening,crs,o,d,0.0 \
   $1
 
