@@ -9,8 +9,8 @@ source /etc/profile.d/netcdf.sh
 # Filenames are like so:
 # aqua.2012066.0306.170828.D.L3.modis.NAT.v09.1000m.nc4
 
-title="MODIS"
-summary="MODIS Data"
+title="MODIS-Aqua"
+summary="MODIS-Aqua data tracked by the University of Delaware and processed through the Advanced Processing system (NRL)"
 keywords="MARACOOS, MODIS, UDEL, Satellite, Rutgers, Chlorophyll"
 naming_authority="MARACOOS"
 id="udel.modis"
@@ -54,22 +54,22 @@ EOF
 # Now create a NetCDF with just the projection
 ncgen -b -k 3 -o crs.nc crs.cdl
 
-# Now combine our file withe the projection file
+# Now combine MODIS file with the projection file
 ncks -h -A crs.nc $1
 
-# Remove the crs files
+# Remove the temporary crs files
 rm -f crs.nc crs.cdl
 
 # Add atttributes to the "crs" variable
 ncatted -h \
   -a grid_mapping_name,crs,o,c,"mercator" \
-  -a longitude_of_projection_origin,crs,o,c,"TODO" \
-  -a standard_parallel,crs,o,c,"TODO" \
+  -a longitude_of_projection_origin,crs,o,d,-74.0 \
+  -a standard_parallel,crs,o,d,35.0 \
   -a semi_major_axis,crs,o,d,6378137.0 \
   -a inverse_flattening,crs,o,d,0.0 \
   $1
 
-# Add "crs" attribute to all the variables, then remove the unneeded ones
+# Add "grid_mapping" attribute to all the variables, then remove the unneeded ones
 ncatted -h -a grid_mapping,,o,c,"crs" $1
 ncatted -h \
   -a grid_mapping,lon,d,c,, \

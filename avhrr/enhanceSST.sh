@@ -60,10 +60,10 @@ EOF
 # Now create a NetCDF with just the projectino
 ncgen -b -k 3 -o crs.nc crs.cdl
 
-# Now combine our file withe the projection file
+# Now combine SST file with the projection file
 ncks -h -A crs.nc $1
 
-# Remove the crs files
+# Remove the temporary crs files
 rm -f crs.nc crs.cdl
 
 # Rename all 'documentation' attribute to 'comments'
@@ -78,7 +78,7 @@ ncatted -h \
   -a inverse_flattening,crs,o,d,0.0 \
   $1
 
-# Add "crs" attribute to the "mcsst" variable
+# Add "grid_mapping" attribute to the "mcsst" variable
 ncatted -h -a grid_mapping,mcsst,o,c,"crs" $1
 
 # Remove unneeded attributes on the "mcsst" variable
