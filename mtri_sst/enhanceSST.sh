@@ -68,7 +68,6 @@ ncatted -h -a _FillValue,sst,o,d,$fillvalue $1
 ncatted -h -a missing_value,sst,o,d,$fillvalue $1
 
 # Add a variable that represents the time
-# Create the projection CDL
 cat > time.cdl << EOF
   netcdf foo { 
     dimensions:
@@ -76,12 +75,19 @@ cat > time.cdl << EOF
     variables:
       int time(time);
     data:
-      time = 0;
+      time = -1;
   }
 EOF
 
 # Now create a NetCDF with just the time
-ncgen -b -k 3 -o time.nc time.cdl
+ncgen -o time.nc time.cdl
+
+# Set the time attributes
+ncatted -h \
+  -a units,time,o,c,"seconds since 1970-01-01 00:00:00" \
+  -a long_name,time,o,c,"Time" \
+  -a standard_name,time,o,c,"time" \
+  time.nc
 
 # Now combine SST file with the time file
 ncks -h -A time.nc $1
@@ -89,31 +95,24 @@ ncks -h -A time.nc $1
 # Remove the temporary time files
 rm -f time.nc time.cdl
 
-# Set the time attributes
-ncatted -h \
-  -a units,time,o,c,"seconds since 1970-01-01 00:00:00" \
-  -a long_name,time,o,c,"Time" \
-  -a standard_name,time,o,c,"time" \
-  $1
-
 # Strip time from filename
 datestring=$(echo $1 | sed 's/\([0-9]\{4\}\)\_\([0-9]\{8\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)\.nc4/\2\ \3\:\4:00/' | awk -F"/" '{print $NF}')
 timestamp=$(date --utc -d "$datestring" +%s)
 tmpfile=/tmp/$timestamp.nc
 
 # Rename variable to 'foo'
-ncrename -h -v sst,foo $1
-
+ncrename -h -O -v sst,foo $1
+  
 # Copy data and attributes from 'foo' to the new dimensioned 'sst'.  Set the new time as well.
 ncap2 -h -O \
+  -s "time=$timestamp" \
   -s 'sst[time,lat,lon]=foo' \
-  -s 'sst@long_name=foo@long_name' \
-  -s 'sst@missing_value=foo@missing_value' \
   -s 'sst@grid_mapping=foo@grid_mapping' \
+  -s 'sst@long_name=foo@long_name' \
   -s 'sst@coordinates=foo@coordinates' \
   -s 'sst@units=foo@units' \
   -s 'sst@standard_name=foo@standard_name' \
-  -s "time=$timestamp" \
+  -s 'sst@missing_value=foo@missing_value' \
   $1 $tmpfile
 
 # Fix missing values (can't copy _FillValue attribute with ncap2)
@@ -127,6 +126,8 @@ ncatted -h \
 
 # Remove foo variable and compress the file again to get the new SST variable
 ncks -4 -L 3 -h -O -x -v foo $tmpfile $1
+
+#ncrename -h -v _nc4_non_coord_time,time $1
 
 rm -f $tmpfile
 
