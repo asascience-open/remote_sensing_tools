@@ -5,8 +5,6 @@ source /etc/profile.d/netcdf.sh
 path=`dirname $2`
 base=`basename $2`
 
-echo $3
-
 echo "Starting composite on $base"
 
 # Composite days are the first paramter into the script
@@ -43,6 +41,7 @@ for f in `find $path -type f`; do
         echo "Masking to $finalPath..."
         # Do some cleanup on the MissingValue attributes files
         ncatted -h -a _FillValue,mcsst,d,, $f $outPath
+        ncatted -h -a missing_value,mcsst,o,f,-999 $outPath
         ncrename -h -a mcsst@missing_value,_FillValue $outPath
         ncatted -h -a missing_value,mcsst,o,f,-999 $outPath
    
