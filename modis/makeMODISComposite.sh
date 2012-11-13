@@ -2,27 +2,35 @@
 
 source /etc/profile.d/netcdf.sh
 
-d1=$(date '+%s')
+path=`dirname $2`
+base=`basename $2`
+
+echo "Starting composite on $base"
 
 # Composite days are the first paramter into the script
-# Location of RAW output is second
+# Absolute path to the BASE FILE to go back from is second
 # Folder to put composite in is third
 
 files=""
 justDates=""
 numDays=$1
-echo "Starting composite..."
-for f in `find $2 -mtime -${numDays} -type f`; do
+seconds=$((numDays * 24 * 60 * 60))
+
+basefileDt=$(echo $base | sed 's/aqua\.\([0-9]\{4\}\)\([0-9]\{3\}\)\.\([0-9]\{4\}\)\.\([0-9]\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)\.D\.L3\.modis\.NAT\.v09\.1000m\.nc4/\1\3\ \4\:\5\:\6/' | awk -F"/" '{print $NF}')
+baseD=$(date --utc -d "$basefileDt" +%s)
+
+for f in `find $path -type f`; do
   # aqua.2012066.0306.170828.D.L3.modis.NAT.v09.1000m.nc4
   fileDt=$(echo $f | sed 's/aqua\.\([0-9]\{4\}\)\([0-9]\{3\}\)\.\([0-9]\{4\}\)\.\([0-9]\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)\.D\.L3\.modis\.NAT\.v09\.1000m\.nc4/\1\3\ \4\:\5\:\6/' | awk -F"/" '{print $NF}')
-  d2=$(date --utc -d "$fileDt" +%s)
-  diff=$((d1-d2))
-  seconds=$((numDays * 24 * 60 * 60))
-  if [ $diff -lt $seconds ]; then
-    tmp=${f##*/}
-    outFile=${tmp%.*}
-    files=${files}" "${f}
-    justDates=${justDates}" "${outFile}
+  fileD=$(date --utc -d "$fileDt" +%s)
+  diff=$((baseD-fileD))
+  if [ $diff -ge 0 ]; then
+    if [ $diff -le $seconds ]; then
+      tmp=${f##*/}
+      outFile=${tmp%.*}
+      files=${files}" "${f}
+      justDates=${justDates}" "${outFile}
+    fi
   fi
 done
 
