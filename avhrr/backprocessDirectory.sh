@@ -19,5 +19,6 @@ for f in `find $2 -type f`; do
     # Get working directory
     DIR="$( cd -P "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
     bash $DIR/makeSSTComposite.sh $1 $f $3 $4
+    #bash $DIR/justMask.sh $1 $f $3 $4
   fi
 done
