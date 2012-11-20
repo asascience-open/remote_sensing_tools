@@ -12,13 +12,18 @@ source /etc/profile.d/netcdf.sh
 title="AVHRR Sea Surface Temperature for MARACOOS (Mid-Atlantic Regional Association Coastal Ocean Observing System)"
 summary="Sea surface temperature over the Mid-Atlantic and surrounding waters from NOAA AVHRR satellites. MCSST calculation and image navigation by TeraScan software; Regridded to Mercator lon/lat projection. Processed and De-clouded at University of Delaware. All data data are preserved, and a multi class cloud mask is provided to the user."
 keywords="MARACOOS, AVHRR, SST, UDEL, Satellite SST, Rutgers, Sea Surface Temperature"
+institution="University of Delaware"
 naming_authority="MARACOOS"
+zsource="NOAA AVHRR"
 id="avhrr.sst"
 cdm_data_type="Grid"
 creator_name="Matt Oliver"
 creator_url="http://orb.ceoe.udel.edu/"
 creator_email="moliver@udel.edu"
 standard_name_vocabulary="http://www.cgd.ucar.edu/cms/eaton/cf-metadata/standard_name.html"
+publisher_name="MARACOOS DMAC"
+publisher_url="http://maracoos.org"
+publisher_email="maracoosinfo@udel.edu"
 
 echo "Starting enhancement of $1"
 
@@ -27,13 +32,18 @@ ncatted -h \
   -a title,global,o,c,"$title" \
   -a summary,global,o,c,"$summary" \
   -a keywords,global,o,c,"$keywords" \
+  -a institution,global,o,c,"$institution" \
   -a naming_authority,global,o,c,"$naming_authority" \
+  -a source,global,o,c,"$zsource" \
   -a id,global,o,c,"$id" \
   -a cdm_data_type,global,o,c,"$cdm_data_type" \
   -a creator_name,global,o,c,"$creator_name" \
   -a creator_url,global,o,c,"$creator_url" \
   -a creator_email,global,o,c,"$creator_email" \
   -a standard_name_vocabulary,global,o,c,"$standard_name_vocabulary" \
+  -a publisher_name,global,o,c,"$publisher_name" \
+  -a publisher_email,global,o,c,"$publisher_email" \
+  -a publisher_url,global,o,c,"$publisher_url" \
   $1
 
 # Remove the missing value attributes and recreate them as floats
