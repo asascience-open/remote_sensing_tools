@@ -7,8 +7,9 @@ echo "Backprocessing MODIS composites from in $2..."
 # Composite days are the first paramter into the script
 # Abolute Location of RAW data is second
 # Folder to put composite in is third
+# How far back to generate composites for.  So the entire directory isn't processed.
 
-for f in `find $2 -type f`; do
+for f in `find $2 -mtime -${4} -type f`; do
   # aqua.2012066.0306.170828.D.L3.modis.NAT.v09.1000m.nc4
   fileDt=$(echo $f | sed 's/aqua\.\([0-9]\{4\}\)\([0-9]\{3\}\)\.\([0-9]\{4\}\)\.\([0-9]\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)\.D\.L3\.modis\.NAT\.v09\.1000m\.nc4/\1\3\ \4\:\5\:\6/' | awk -F"/" '{print $NF}')
   fileD=$(date --utc -d "$fileDt" +%Y%m%d.%H%M%S)
