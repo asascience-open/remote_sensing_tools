@@ -134,21 +134,18 @@ ncap2 -h -O \
   -s 'Band1@grid_mapping=foo1@grid_mapping' \
   -s 'Band1@long_name=foo1@long_name' \
   -s 'Band1@coordinates=foo1@coordinates' \
-  -s 'Band1@units=foo1@units' \
   -s 'Band1@standard_name=foo1@standard_name' \
   -s 'Band1@missing_value=foo1@missing_value' \
   -s 'Band2[time,lat,lon]=foo2' \
   -s 'Band2@grid_mapping=foo2@grid_mapping' \
   -s 'Band2@long_name=foo2@long_name' \
   -s 'Band2@coordinates=foo2@coordinates' \
-  -s 'Band2@units=foo2@units' \
   -s 'Band2@standard_name=foo2@standard_name' \
   -s 'Band2@missing_value=foo2@missing_value' \
   -s 'Band3[time,lat,lon]=foo3' \
   -s 'Band3@grid_mapping=foo3@grid_mapping' \
   -s 'Band3@long_name=foo3@long_name' \
   -s 'Band3@coordinates=foo3@coordinates' \
-  -s 'Band3@units=foo3@units' \
   -s 'Band3@standard_name=foo3@standard_name' \
   -s 'Band3@missing_value=foo3@missing_value' \
   $1 $tmpfile
@@ -164,11 +161,17 @@ ncatted -h \
 ncrename -O -h -a Band1@missing_value,_FillValue $tmpfile
 ncrename -O -h -a Band2@missing_value,_FillValue $tmpfile
 ncrename -O -h -a Band3@missing_value,_FillValue $tmpfile
-
 ncatted -h \
   -a missing_value,Band1,o,d,$fillvalue \
   -a missing_value,Band2,o,d,$fillvalue \
   -a missing_value,Band3,o,d,$fillvalue \
+  $tmpfile
+
+# Add in some units
+ncatted -h \
+  -a units,Band1,o,c,red_band_intensity \
+  -a units,Band2,o,c,green_band_intensity \
+  -a units,Band3,o,c,blue_band_intensity \
   $tmpfile
 
 # Add comment about projection to the "Band1-3" variables
