@@ -3,14 +3,15 @@
 source /etc/profile.d/netcdf.sh
 
 # Enhances a single SST output file with metadata
-# First parameter to the script is the location of the SST
-# NetCDF file to enhance.
-#
+
 # Filenames are like so:
 # 4326_201206250700.nc4
 
-title="MODIS Lake Surface Temperature for GLOS (Great Lakes Observing System)"
-summary="Lake surface temperature over the Great Lakes and surrounding waters from MODIS satellites."
+# First parameter is the location of the SST NetCDF file to enhance.
+# Second parameter is the lake name, capitalized. ie. Erie/Michigan
+
+title="Lake $2 - MODIS - Lake Surface Temperature"
+summary="Lake surface temperature for Lake $2 and surrounding waters from MODIS satellites."
 keywords="GLOS, MODIS, LST, SST, MTRI, AOC, Satellite, Sea Surface Temperature, Lake Surface Temperature"
 institution="Michigan Tech Research Institute (MTRI)"
 naming_authority="GLOS"
