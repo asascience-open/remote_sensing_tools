@@ -3,24 +3,20 @@
 source /etc/profile.d/netcdf.sh
 
 # Enhances a single Natural Color output file with metadata
-# First parameter to the script 
-#
+
 # Filenames are like so (YYYYMMDD_HHMM.nc4)
 # 20120321_1625.nc4
 
 # First parameter is the location of the Natural Color NetCDF file to enhance.
 # Second parameter is the lake name, capitalized. ie. Erie/Michigan
 
-# NOTE: replace "SATELLITE_TYPE" with the satellite type, ie. MODIS / AVHRR
-# NOTE: update the "zsource" variable, ie. "MODIS Aqua, 4 micrometer night time collection"
-
-title="Lake $2 - SATELLITE_TYPE - Naturual Color Imagery"
-summary="Natural Color Imagery for the Lake $2 and surrounding water from SATELLITE_TYPE satellites"
-keywords="GLOS, SATELLITE_TYPE, MTRI, Natural Color Imagery, Basemap, Satellite"
+title="Lake $2 - MODIS - Natural Color Imagery"
+summary="Natural Color Imagery for Lake $2 and surrounding water from MODIS satellites"
+keywords="GLOS, MODIS, MTRI, Natural Color Imagery, Basemap, Satellite"
 institution="Michigan Tech Research Institute (MTRI)"
 naming_authority="GLOS"
-zsource="SOURCE"
-id="SATELLITE_TYPE.nci"
+zsource="MODIS Aqua, 4 micrometer night time collection"
+id="modis.nci"
 cdm_data_type="Grid"
 creator_name="Colin Brooks"
 creator_url="http://www.mtri.org/"
