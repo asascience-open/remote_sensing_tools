@@ -26,6 +26,7 @@ project="GLOS MTRI AOC"
 publisher_name="GLOS DMAC"
 publisher_url="http://glos.us"
 publisher_email="dmac@glos.us"
+metadata_link="http://data.glos.us/portal/"
 
 
 echo "Starting enhancement of $1"
@@ -51,6 +52,12 @@ ncatted -h \
   -a publisher_name,global,o,c,"$publisher_name" \
   -a publisher_email,global,o,c,"$publisher_email" \
   -a publisher_url,global,o,c,"$publisher_url" \
+  -a metadata_link,global,o,c,"$metadata_link" \
+  -a geospatial_vertical_min,global,o,d,0.0 \
+  -a geospatial_vertical_max,global,o,d,0.0 \
+  -a geospatial_vertical_units,global,o,c,"meters" \
+  -a geospatial_vertical_resolution,global,o,d,0.0 \
+  -a geospatial_vertical_positive,global,o,c,"up" \
   $1
 
 # Update CF convention to 1.6
