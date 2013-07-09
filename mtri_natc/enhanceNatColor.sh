@@ -158,9 +158,9 @@ ncrename -O -h -a Band1@missing_value,_FillValue $tmpfile
 ncrename -O -h -a Band2@missing_value,_FillValue $tmpfile
 ncrename -O -h -a Band3@missing_value,_FillValue $tmpfile
 ncatted -h \
-  -a missing_value,Band1,o,d,$fillvalue \
-  -a missing_value,Band2,o,d,$fillvalue \
-  -a missing_value,Band3,o,d,$fillvalue \
+  -a missing_value,Band1,o,b,$fillvalue \
+  -a missing_value,Band2,o,b,$fillvalue \
+  -a missing_value,Band3,o,b,$fillvalue \
   $tmpfile
 
 # Add in some units
